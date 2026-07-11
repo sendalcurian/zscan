@@ -77,7 +77,7 @@ sequenceDiagram
     zscan->>zscan: Evaluate rules
     zscan-->>User: Quality report
 
-    Note over Data: ❌ Never accessed
+    Note over Data: NOT accessed
 ```
 
 ---
@@ -212,9 +212,9 @@ checker.add_rule(RangeViolationRule(column_bounds={"value": (0, None)}))
 report = checker.run_checks("mydb.data", metadata=metadata)
 
 if report.passed:
-    print("✅ All checks passed!")
+    print("All checks passed.")
 else:
-    print(f"❌ {report.total_violations} violations found")
+    print(f"{report.total_violations} violations found")
     for result in report.failed_rules:
         for v in result.violations:
             print(f"   - {v.message}")
@@ -479,7 +479,7 @@ graph LR
 
 | id | name | value | category |
 |----|------|-------|----------|
-| 11 | Kate | **-5.0** ⚠️ | A |
+| 11 | Kate | **-5.0** [OUTLIER] | A |
 | 12 | Liam | 120.0 | B |
 | 13 | Mia | 130.0 | A |
 | 14 | Noah | 140.0 | B |
@@ -505,10 +505,10 @@ graph LR
 
 | Rule | Snapshot 1→2 | Snapshot 2→3 | Explanation |
 |------|--------------|--------------|-------------|
-| `row_count_drift` | ✅ DETECTED (100% change) | ✅ DETECTED (50% change) | Row count doubled, then grew 50% |
-| `null_rate_check` | ✅ DETECTED (11.76% > 10%) | ✅ DETECTED (11.76% > 10%) | Nulls persist across snapshots |
-| `range_violation` | — No violation | ⚠️ SKIPPED (binary bounds) | -5.0 detected but bounds are binary-encoded |
-| `file_count_anomaly` | ✅ PASSED | ✅ PASSED | No file count anomalies |
+| `row_count_drift` | DETECTED (100% change) | DETECTED (50% change) | Row count doubled, then grew 50% |
+| `null_rate_check` | DETECTED (11.76% > 10%) | DETECTED (11.76% > 10%) | Nulls persist across snapshots |
+| `range_violation` | — No violation | SKIPPED (binary bounds) | -5.0 detected but bounds are binary-encoded |
+| `file_count_anomaly` | PASSED | PASSED | No file count anomalies |
 
 ### Cumulative Statistics
 
