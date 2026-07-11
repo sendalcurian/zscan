@@ -10,7 +10,7 @@ import tempfile
 from pathlib import Path
 
 import pyarrow as pa
-from pyiceberg.catalog import SqlCatalog
+from pyiceberg.catalog.sql import SqlCatalog
 
 from zscan import MetadataExtractor, QualityChecker
 from zscan.core.checks import print_report
@@ -65,6 +65,7 @@ def create_sample_table(warehouse_path: Path) -> str:
             "value": [10.0, 20.0, 30.0, 40.0, 50.0],
             "category": ["A", "B", "A", "B", "A"],
         },
+        schema=schema,
     )
     table.append(data1)
 
@@ -76,6 +77,7 @@ def create_sample_table(warehouse_path: Path) -> str:
             "value": [60.0, None, 80.0, None, 100.0],
             "category": ["B", "A", None, "B", None],
         },
+        schema=schema,
     )
     table.append(data2)
 
@@ -87,6 +89,7 @@ def create_sample_table(warehouse_path: Path) -> str:
             "value": [-5.0, 120.0, 130.0, 140.0, 150.0],  # -5 is out of range
             "category": ["A", "B", "A", "B", "A"],
         },
+        schema=schema,
     )
     table.append(data3)
 

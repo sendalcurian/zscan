@@ -134,7 +134,7 @@ class MetadataExtractor:
         if self._catalog is None:
             self._catalog = load_catalog(
                 self._catalog_name,
-                type="sql", uri=f"sqlite://{self.warehouse_path / 'catalog.db'}", warehouse=str(self.warehouse_path),
+                type="sql", uri=f"sqlite:///{self.warehouse_path / 'catalog.db'}", warehouse=str(self.warehouse_path),
             )
         return self._catalog
 
@@ -172,7 +172,7 @@ class MetadataExtractor:
                         snapshot_id=snap.snapshot_id,
                         timestamp_ms=snap.timestamp_ms,
                         operation=snap.summary.get("operation", "unknown"),
-                        summary=dict(snap.summary),
+                        summary={"operation": str(snap.summary.operation.value), **snap.summary._additional_properties} if snap.summary else {},
                     ),
                 )
 
@@ -220,30 +220,23 @@ class MetadataExtractor:
 
             # Parse column stats
             column_stats = {}
-            if row.get("null_value_counts"):
-                for col_id, null_count in row["null_value_counts"].items():
-                    col_name = self._resolve_column_name(table, int(col_id))
-                    column_stats[col_name] = ColumnStats(
-                        column_id=int(col_id),
-                        column_name=col_name,
-                        value_count=(
-                            row["value_counts"].get(col_id, 0)
-                            if row.get("value_counts")
-                            else 0
-                        ),
-                        null_count=null_count,
-                        nan_count=(
-                            row["nan_value_counts"].get(col_id, 0)
-                            if row.get("nan_value_counts")
-                            else 0
-                        ),
-                        lower_bound=(
-                            row["lower_bounds"].get(col_id) if row.get("lower_bounds") else None
-                        ),
-                        upper_bound=(
-                            row["upper_bounds"].get(col_id) if row.get("upper_bounds") else None
-                        ),
-                    )
+            null_counts = dict(row.get("null_value_counts") or [])
+            value_counts = dict(row.get("value_counts") or [])
+            nan_counts = dict(row.get("nan_value_counts") or [])
+            lower_bounds = dict(row.get("lower_bounds") or [])
+            upper_bounds = dict(row.get("upper_bounds") or [])
+
+            for col_id, null_count in null_counts.items():
+                col_name = self._resolve_column_name(table, int(col_id))
+                column_stats[col_name] = ColumnStats(
+                    column_id=int(col_id),
+                    column_name=col_name,
+                    value_count=value_counts.get(col_id, 0),
+                    null_count=null_count,
+                    nan_count=nan_counts.get(col_id, 0),
+                    lower_bound=lower_bounds.get(col_id),
+                    upper_bound=upper_bounds.get(col_id),
+                )
 
             data_files.append(
                 DataFileStats(

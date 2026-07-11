@@ -378,6 +378,9 @@ class RangeViolationRule(Rule):
             for df in metadata.data_files:
                 if col_name in df.column_stats:
                     stats = df.column_stats[col_name]
+                    # Skip if bounds are bytes (binary encoded)
+                    if isinstance(stats.lower_bound, bytes) or isinstance(stats.upper_bound, bytes):
+                        continue
                     if stats.lower_bound is not None:
                         actual_min = (
                             stats.lower_bound
