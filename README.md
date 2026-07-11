@@ -395,6 +395,156 @@ uv run pre-commit run --all-files
 
 ---
 
+## Demo Data Conditions
+
+The demo (`examples/demo.py`) creates a controlled dataset with injected quality issues to demonstrate zero-scan detection capabilities.
+
+### Schema
+
+| Column | Type | Nullable | Description |
+|--------|------|----------|-------------|
+| `id` | `int64` | No | Unique identifier (1–15) |
+| `name` | `string` | Yes | Person names |
+| `value` | `float64` | Yes | Numeric measurements |
+| `category` | `string` | Yes | Category labels (A/B) |
+
+### Snapshot History
+
+The demo creates **3 snapshots** with progressively worse data quality:
+
+```mermaid
+graph LR
+    subgraph "Snapshot 1 (Clean)"
+        S1[5 rows]
+        S1C[0% nulls]
+        S1R[All values in range]
+    end
+
+    subgraph "Snapshot 2 (Nulls Injected)"
+        S2[10 rows]
+        S2C[~12% nulls]
+        S2R[All values in range]
+    end
+
+    subgraph "Snapshot 3 (Outliers Injected)"
+        S3[15 rows]
+        S3C[~8% nulls]
+        S3R[value=-5.0 out of range]
+    end
+
+    S1 -->|append| S2
+    S2 -->|append| S3
+
+    style S1 fill:#c8e6c9
+    style S2 fill:#fff9c4
+    style S3 fill:#ffcdd2
+```
+
+### Snapshot Details
+
+#### Snapshot 1: Clean Data
+
+| id | name | value | category |
+|----|------|-------|----------|
+| 1 | Alice | 10.0 | A |
+| 2 | Bob | 20.0 | B |
+| 3 | Charlie | 30.0 | A |
+| 4 | David | 40.0 | B |
+| 5 | Eve | 50.0 | A |
+
+**Conditions:** 5 rows, 0% nulls, all values positive.
+
+---
+
+#### Snapshot 2: Null Injection
+
+| id | name | value | category |
+|----|------|-------|----------|
+| 6 | Frank | 60.0 | B |
+| 7 | **null** | **null** | A |
+| 8 | Hank | 80.0 | **null** |
+| 9 | **null** | **null** | B |
+| 10 | Jack | 100.0 | **null** |
+
+**Conditions:** 5 new rows (10 total), 4 nulls across 3 columns (~12% null rate per column).
+
+**Injected Issues:**
+- `name`: 2 nulls (rows 7, 9)
+- `value`: 2 nulls (rows 7, 9)
+- `category`: 2 nulls (rows 8, 10)
+
+---
+
+#### Snapshot 3: Outlier Injection
+
+| id | name | value | category |
+|----|------|-------|----------|
+| 11 | Kate | **-5.0** ⚠️ | A |
+| 12 | Liam | 120.0 | B |
+| 13 | Mia | 130.0 | A |
+| 14 | Noah | 140.0 | B |
+| 15 | Olivia | 150.0 | A |
+
+**Conditions:** 5 new rows (15 total), 1 out-of-range value.
+
+**Injected Issues:**
+- `value`: -5.0 violates expected range `[0, ∞)`
+
+---
+
+### Quality Rule Thresholds
+
+| Rule | Threshold | Rationale |
+|------|-----------|-----------|
+| `RowCountDriftRule` | 20% | Detects unexpected drops/spikes in row counts |
+| `NullRateRule` | 10% | Flags columns with excessive nulls |
+| `RangeViolationRule` | `value >= 0` | Ensures non-negative values |
+| `FileCountAnomalyRule` | +100% / -50% | Detects file count anomalies |
+
+### Expected Detection Results
+
+| Rule | Snapshot 1→2 | Snapshot 2→3 | Explanation |
+|------|--------------|--------------|-------------|
+| `row_count_drift` | ✅ DETECTED (100% change) | ✅ DETECTED (50% change) | Row count doubled, then grew 50% |
+| `null_rate_check` | ✅ DETECTED (11.76% > 10%) | ✅ DETECTED (11.76% > 10%) | Nulls persist across snapshots |
+| `range_violation` | — No violation | ⚠️ SKIPPED (binary bounds) | -5.0 detected but bounds are binary-encoded |
+| `file_count_anomaly` | ✅ PASSED | ✅ PASSED | No file count anomalies |
+
+### Cumulative Statistics
+
+After all 3 snapshots:
+
+| Metric | Value |
+|--------|-------|
+| Total rows | 15 |
+| Null rate (`name`) | 2/15 = 13.3% |
+| Null rate (`value`) | 2/15 = 13.3% |
+| Null rate (`category`) | 2/15 = 13.3% |
+| Out-of-range values | 1 (`value = -5.0`) |
+| Data files | 3 (1 per snapshot) |
+
+### Customizing Demo Conditions
+
+To modify the demo data, edit `examples/demo.py`:
+
+```python
+# Change null rate threshold
+checker.add_rule(NullRateRule(default_threshold=0.05))  # 5% instead of 10%
+
+# Change row count drift threshold  
+checker.add_rule(RowCountDriftRule(threshold_pct=10.0))  # 10% instead of 20%
+
+# Add custom range bounds
+checker.add_rule(RangeViolationRule(
+    column_bounds={
+        "value": (0, 200),      # 0 <= value <= 200
+        "id": (1, 1000),        # 1 <= id <= 1000
+    }
+))
+```
+
+---
+
 ## Examples
 
 ### Run the Demo
