@@ -1,0 +1,63 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to release (e.g. v0.0.1)"
+        required: false
+
+permissions:
+  contents: write
+  id-token: write  # for OIDC trusted publishing if enabled
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install deps
+        run: uv sync --extra dev
+
+      - name: Run tests (gate)
+        run: uv run pytest -q
+
+      - name: Build sdist + wheel
+        run: uv build
+
+      - name: Twine check
+        run: |
+          uv run pip install twine
+          uv run twine check dist/*
+
+      - name: List dist
+        run: ls -lh dist/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Uncomment to enable PyPI trusted publishing after configuring PyPI publisher:
+      # - name: Publish to PyPI
+      #   uses: pypa/gh-action-pypi-publish@release/v1
+      #   with:
+      #     verbose: true
