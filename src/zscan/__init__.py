@@ -16,7 +16,7 @@ from zscan.core.checks import QualityChecker
 from zscan.core.metadata import MetadataExtractor
 from zscan.core.rules import Rule, RuleResult
 
-__version__ = "0.1.0"
+__version__ = "0.0.1"
 __all__ = [
     "MetadataExtractor",
     "QualityChecker",
