@@ -134,7 +134,9 @@ class MetadataExtractor:
         if self._catalog is None:
             self._catalog = load_catalog(
                 self._catalog_name,
-                type="sql", uri=f"sqlite:///{self.warehouse_path / 'catalog.db'}", warehouse=str(self.warehouse_path),
+                type="sql",
+                uri=f"sqlite:///{self.warehouse_path / 'catalog.db'}",
+                warehouse=str(self.warehouse_path),
             )
         return self._catalog
 
@@ -172,7 +174,12 @@ class MetadataExtractor:
                         snapshot_id=snap.snapshot_id,
                         timestamp_ms=snap.timestamp_ms,
                         operation=snap.summary.get("operation", "unknown"),
-                        summary={"operation": str(snap.summary.operation.value), **snap.summary._additional_properties} if snap.summary else {},
+                        summary={
+                            "operation": str(snap.summary.operation.value),
+                            **snap.summary._additional_properties,
+                        }
+                        if snap.summary
+                        else {},
                     ),
                 )
 
@@ -194,9 +201,7 @@ class MetadataExtractor:
             table_name=table_name,
             location=table.location(),
             current_snapshot_id=(
-                table.current_snapshot().snapshot_id
-                if table.current_snapshot()
-                else None
+                table.current_snapshot().snapshot_id if table.current_snapshot() else None
             ),
             schema_fields=schema_fields,
             snapshots=snapshots,
@@ -252,7 +257,9 @@ class MetadataExtractor:
         return data_files
 
     def _resolve_column_name(
-        self: MetadataExtractor, table: Table, column_id: int,
+        self: MetadataExtractor,
+        table: Table,
+        column_id: int,
     ) -> str:
         """Resolve a column ID to its name using the table schema.
 
@@ -269,7 +276,10 @@ class MetadataExtractor:
         return f"unknown_{column_id}"
 
     def get_snapshot_diff(
-        self: MetadataExtractor, table_name: str, snapshot_id_1: int, snapshot_id_2: int,
+        self: MetadataExtractor,
+        table_name: str,
+        snapshot_id_1: int,
+        snapshot_id_2: int,
     ) -> dict[str, Any]:
         """Compare metadata between two snapshots.
 
@@ -284,10 +294,12 @@ class MetadataExtractor:
         metadata = self.get_table_metadata(table_name)
 
         snap1 = next(
-            (s for s in metadata.snapshots if s.snapshot_id == snapshot_id_1), None,
+            (s for s in metadata.snapshots if s.snapshot_id == snapshot_id_1),
+            None,
         )
         snap2 = next(
-            (s for s in metadata.snapshots if s.snapshot_id == snapshot_id_2), None,
+            (s for s in metadata.snapshots if s.snapshot_id == snapshot_id_2),
+            None,
         )
 
         if not snap1 or not snap2:
@@ -308,7 +320,9 @@ class MetadataExtractor:
         }
 
     def query_with_duckdb(
-        self: MetadataExtractor, table_name: str, sql: str,
+        self: MetadataExtractor,
+        table_name: str,
+        sql: str,
     ) -> pa.Table:
         """Execute a DuckDB query against Iceberg metadata.
 

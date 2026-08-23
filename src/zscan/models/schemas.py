@@ -65,14 +65,10 @@ class QualityCheckConfig:
         """
         tables = []
         for table_data in data.get("tables", []):
-            rules = [
-                RuleConfig(**rule) for rule in table_data.get("rules", [])
-            ]
+            rules = [RuleConfig(**rule) for rule in table_data.get("rules", [])]
             tables.append(TableConfig(name=table_data["name"], rules=rules))
 
-        default_rules = [
-            RuleConfig(**rule) for rule in data.get("default_rules", [])
-        ]
+        default_rules = [RuleConfig(**rule) for rule in data.get("default_rules", [])]
 
         return cls(
             warehouse_path=data["warehouse_path"],

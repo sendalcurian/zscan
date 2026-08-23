@@ -114,7 +114,10 @@ class Rule(ABC):
     """
 
     def __init__(
-        self: Rule, name: str, description: str, severity: Severity = Severity.WARNING,
+        self: Rule,
+        name: str,
+        description: str,
+        severity: Severity = Severity.WARNING,
     ) -> None:
         """Initialize the rule.
 
@@ -210,7 +213,7 @@ class RowCountDriftRule(Rule):
                         column=None,
                         message=(
                             f"Row count changed by {change_pct:.1f}% "
-                            f"(snapshot {snapshots[i-1].snapshot_id} → "
+                            f"(snapshot {snapshots[i - 1].snapshot_id} → "
                             f"{snapshots[i].snapshot_id})"
                         ),
                         severity=self.severity,
@@ -509,7 +512,7 @@ class FileCountAnomalyRule(Rule):
                         column=None,
                         message=(
                             f"File count increased by {change_pct:.1f}% "
-                            f"(snapshot {snapshots[i-1].snapshot_id} → "
+                            f"(snapshot {snapshots[i - 1].snapshot_id} → "
                             f"{snapshots[i].snapshot_id})"
                         ),
                         severity=self.severity,
@@ -527,7 +530,7 @@ class FileCountAnomalyRule(Rule):
                         column=None,
                         message=(
                             f"File count decreased by {abs(change_pct):.1f}% "
-                            f"(snapshot {snapshots[i-1].snapshot_id} → "
+                            f"(snapshot {snapshots[i - 1].snapshot_id} → "
                             f"{snapshots[i].snapshot_id})"
                         ),
                         severity=self.severity,

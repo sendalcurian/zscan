@@ -34,7 +34,8 @@ def create_sample_table(warehouse_path: Path) -> str:
     """
     catalog = SqlCatalog(
         "default",
-        uri=f"sqlite:///{warehouse_path / 'catalog.db'}", warehouse=str(warehouse_path),
+        uri=f"sqlite:///{warehouse_path / 'catalog.db'}",
+        warehouse=str(warehouse_path),
     )
 
     # Create namespace
@@ -100,7 +101,6 @@ def main() -> None:
     """Run the demo quality checks."""
     setup_logging()
 
-
     with tempfile.TemporaryDirectory() as tmpdir:
         warehouse_path = Path(tmpdir) / "warehouse"
         warehouse_path.mkdir()
@@ -122,9 +122,6 @@ def main() -> None:
 
         report = checker.run_checks(table_name, metadata=metadata)
         print_report(report)
-
-
-
 
 
 if __name__ == "__main__":
