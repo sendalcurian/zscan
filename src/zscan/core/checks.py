@@ -134,7 +134,9 @@ class QualityChecker:
         self.rules.append(rule)
 
     def run_checks(
-        self: QualityChecker, table_name: str, metadata: TableMetadata | None = None,
+        self: QualityChecker,
+        table_name: str,
+        metadata: TableMetadata | None = None,
     ) -> CheckReport:
         """Run all quality checks against a table.
 
@@ -154,9 +156,7 @@ class QualityChecker:
             results.append(result)
 
         total_violations = sum(r.violation_count for r in results)
-        all_passed = all(
-            r.status in (CheckStatus.PASSED, CheckStatus.SKIPPED) for r in results
-        )
+        all_passed = all(r.status in (CheckStatus.PASSED, CheckStatus.SKIPPED) for r in results)
 
         return CheckReport(
             table_name=table_name,
