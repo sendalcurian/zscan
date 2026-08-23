@@ -12,7 +12,6 @@ on:
 
 permissions:
   contents: write
-  id-token: write  # for OIDC trusted publishing if enabled
 
 jobs:
   build-and-release:
@@ -60,7 +59,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Uncomment to enable PyPI trusted publishing after configuring PyPI publisher:
+      # PyPI publishing intentionally disabled — GitHub Releases only.
+      # To enable, add `id-token: write` to permissions and uncomment:
       # - name: Publish to PyPI
       #   uses: pypa/gh-action-pypi-publish@release/v1
       #   with:
