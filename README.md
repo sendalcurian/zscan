@@ -2,7 +2,9 @@
 
 **Zero-scan data quality observability via Apache Iceberg table metadata.**
 
-[![Python 3.14+](https://img.shields.io/badge/python-3.14+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![Release](https://img.shields.io/github/v/release/sendalcurian/zscan?label=release)](https://github.com/sendalcurian/zscan/releases)
+[![CI](https://github.com/sendalcurian/zscan/actions/workflows/ci.yml/badge.svg)](https://github.com/sendalcurian/zscan/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
@@ -125,10 +127,31 @@ graph LR
 
 ### Prerequisites
 
-- Python 3.14+
+- Python 3.10+
 - [uv](https://docs.astral.sh/uv/) (recommended) or pip
 
-### Using uv (Recommended)
+Distribution is **GitHub Releases only** (no PyPI). Each tag `v*.*.*` publishes a `.whl` + `.tar.gz` as release assets.
+
+### From GitHub Release (Recommended)
+
+```bash
+# Latest release (example v0.0.1) — via pip
+pip install https://github.com/sendalcurian/zscan/releases/download/v0.0.1/zscan-0.0.1-py3-none-any.whl
+
+# With uv
+uv pip install https://github.com/sendalcurian/zscan/releases/download/v0.0.1/zscan-0.0.1-py3-none-any.whl
+
+# Specific version
+pip install https://github.com/sendalcurian/zscan/releases/download/v0.0.2/zscan-0.0.2-py3-none-any.whl
+
+# Via git tag (pluggable — always tracks source)
+pip install git+https://github.com/sendalcurian/zscan@v0.0.1
+uv pip install git+https://github.com/sendalcurian/zscan@v0.0.1
+```
+
+> Pluggable use: pin another project to `zscan @ https://.../zscan-0.0.1-py3-none-any.whl` in its `pyproject.toml` / `requirements.txt` without needing PyPI.
+
+### From Source (Development)
 
 ```bash
 # Clone the repository
@@ -140,14 +163,9 @@ uv sync
 
 # Or install with dev dependencies
 uv sync --extra dev
-```
 
-### Using pip
-
-```bash
+# Or with pip (editable)
 pip install -e .
-
-# Or with dev dependencies
 pip install -e ".[dev]"
 ```
 
