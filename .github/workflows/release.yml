@@ -37,12 +37,14 @@ jobs:
         run: uv run pytest -q
 
       - name: Build sdist + wheel
-        run: uv build
+        run: |
+          uv build
+          rm -f dist/.gitignore
 
       - name: Twine check
         run: |
           uv run pip install twine
-          uv run twine check dist/*
+          uv run twine check dist/*.whl dist/*.tar.gz
 
       - name: List dist
         run: ls -lh dist/
@@ -50,7 +52,9 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/*
+          files: |
+            dist/*.whl
+            dist/*.tar.gz
           generate_release_notes: true
           fail_on_unmatched_files: true
         env:
